@@ -10,6 +10,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric import ec
 import json
+transaction_info = {}
+
 
 app = Flask(__name__)
 
@@ -58,44 +60,68 @@ def generate_wallet():
     })
 
 
-def get_transaction_history(address, blocks):
+def get_transaction_history(address, blockchain):
     history = []
-    for block in blocks:
-        # Check if the data field is a dictionary (transaction)
-        if isinstance(block['data'], dict):
-            tx = block['data']
-            # Check if the transaction involves the given address
-            if tx['sender'] == address or tx['recipient'] == address:
+    for block in blockchain.chain:
+        if block.data == "Genesis Block":
+            continue
+        for tx_hash in block.data:
+            tx = transaction_info.get(tx_hash, {})
+            if tx.get('sender') == address or tx.get('recipient') == address:
                 history.append(tx)
     return history
+
+# def get_transaction_history(address, blocks):
+#     history = []
+#     for block in blocks:
+#         # Check if the data field is a dictionary (transaction)
+#         if isinstance(block['data'], dict):
+#             tx = block['data']
+#             # Check if the transaction involves the given address
+#             if tx['sender'] == address or tx['recipient'] == address:
+#                 history.append(tx)
+#     return history
 
 
 def calculate_fee(transaction_amount):
     return 0.01 * transaction_amount
 
-def calculate_balance(address, blocks):
-    balance = 100  # initialized dummy balance 
+# def calculate_balance(address, blocks):
+#     balance = 100  # initialized dummy balance 
 
-    for block in blocks:
-        # Check if the data is a transaction dictionary, this is to ensure we dont iterate over the genesis block
-        if isinstance(block['data'], dict):
-            # Extract the transaction
-            tx = block['data']
-            if 'recipient' in tx and 'sender' in tx and 'amount' in tx:
-                 # Calculate the fee for this transaction
+#     for block in blocks:
+#         # Check if the data is a transaction dictionary, this is to ensure we dont iterate over the genesis block
+#         if isinstance(block['data'], dict):
+#             # Extract the transaction
+#             tx = block['data']
+#             if 'recipient' in tx and 'sender' in tx and 'amount' in tx:
+#                  # Calculate the fee for this transaction
 
-                fee = calculate_fee(tx['amount']) 
-                # If address is the recipient, increase balance by the transaction amount (no fee)
-                if tx['recipient'] == address:
-                    balance += tx['amount']
+#                 fee = calculate_fee(tx['amount']) 
+#                 # If address is the recipient, increase balance by the transaction amount (no fee)
+#                 if tx['recipient'] == address:
+#                     balance += tx['amount']
 
-                # If address is the sender, decrease balance by the transaction amount plus the fee
-                if tx['sender'] == address:
-                    total_amount = tx['amount'] + fee #  baance is 100, sending 10.00, +0.99 as fee => 10.99
-                    balance -= total_amount     # balance = 100 -10.99
+#                 # If address is the sender, decrease balance by the transaction amount plus the fee
+#                 if tx['sender'] == address:
+#                     total_amount = tx['amount'] + fee #  baance is 100, sending 10.00, +0.99 as fee => 10.99
+#                     balance -= total_amount     # balance = 100 -10.99
 
+#     return balance
+
+
+def calculate_balance(address, blockchain):
+    balance = 100  # Initial balance
+    for block in blockchain.chain:
+        if block.data == "Genesis Block":
+            continue
+        for tx_hash in block.data:
+            tx = transaction_info.get(tx_hash, {})
+            if tx.get('recipient') == address:
+                balance += tx.get('amount', 0)
+            if tx.get('sender') == address:
+                balance -= (tx.get('amount', 0) + tx.get('fee', 0))
     return balance
-
 
 @app.route('/fetch_wallet_info', methods=['POST'])
 def fetch_wallet_info():
@@ -111,8 +137,8 @@ def fetch_wallet_info():
     try:
         chain_data = blockchain.get_chain()
         print(chain_data)
-        balance = calculate_balance(public_address, chain_data)
-        history = get_transaction_history(public_address, chain_data)
+        balance = calculate_balance(public_address, blockchain)
+        history = get_transaction_history(public_address, blockchain)
 
         return jsonify({
             "publicAddress": user_wallet.address,
@@ -131,7 +157,7 @@ def transaction_route():
     sender = data.get('sender')
     recipient = data.get('recipient')
     amount = data.get('amount')
-    private_key_pem = data.get('privateKey')
+    private_key_pem = '\n-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIEPGrVtaurwuDHVy+pmMs2Qak+qNyVHUilZTqW5jnE3WoAoGCCqGSM49AwEHoUQDQgAEI6sZGteJUfOL9lvnATxBnSJ1mdY7us7+FivzkIoykZYL49D8I8KIzkw1MnAHcJV80Z9JA/kKPMDS/lgBYEMwVA==\n-----END EC PRIVATE KEY-----\n'
     # the transaction is signed using pem, whch is serialized back into raw pvt key before actually ebing used for signature
     print("Private Key (PEM):", private_key_pem)
     private_key = serialization.load_pem_private_key(
@@ -148,10 +174,16 @@ def transaction_route():
     if not all([sender, recipient, amount, private_key]):
         return jsonify({"error": "Missing data"}), 400
     fee = calculate_fee(amount)
-    tx = transaction.create_transaction(sender, recipient, amount, private_key, fee)   
-    # Add transaction to the blockchain
-    blockchain.add_block(tx)
-    return jsonify({"message": "Transaction added", "block_index": len(blockchain.chain) - 1})
+    tx = transaction.create_transaction(sender, recipient, amount, private_key, fee)
+    # Add the transaction hash to the mempool
+    transaction_json = json.dumps(tx, sort_keys=True).encode()
+    transaction_hash = hashlib.sha256(transaction_json).hexdigest()
+    blockchain.mempool.append(transaction_hash)
+
+    # Store the full transaction in transaction_info
+    transaction_info[transaction_hash] = tx
+
+    return jsonify({"message": "Transaction added to the pool", "pool_size": len(blockchain.mempool)})
 
 
 # route for getting the blockchain
@@ -165,7 +197,7 @@ def get_chain():
 @app.route('/test_key_loading')
 def test_key_loading():
     try:
-        pem_private_key =
+        pem_private_key = """"""
         private_key = serialization.load_pem_private_key(
             pem_private_key.encode(),
             password=None,

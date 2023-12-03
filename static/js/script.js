@@ -199,16 +199,17 @@ function formatTransactionData(transaction) {
 function formatBlockData(block) {
     var formattedData = '<strong>Timestamp: </strong> ' + block.timestamp + '<br>';
     formattedData += '<strong>Previous Hash: </strong> ' + block.previous_hash + '<br>';
-    formattedData += '<strong>Current Hash: </strong> ' + block.current_hash + '<br>'+'<br>';
+    formattedData += '<strong>Current Hash: </strong> ' + block.current_hash + '<br>' + '<br>';
 
     if (Array.isArray(block.data)) {
-        block.data.forEach(transaction => {
-            formattedData += '<div class="transaction">' + formatTransactionData(transaction) + '</div>';
-        });
-    } else if (typeof block.data === 'object' && block.data !== null) {
-        formattedData += '<div class="transaction">' + formatTransactionData(block.data) + '</div>';
+        if (block.data.length === 1) {
+            formattedData += '<strong>Transaction Hash:</strong> ' + block.data[0] + '<br>';
+        } else {
+            formattedData += '<strong>Data:</strong> ' + JSON.stringify(block.data) + '<br>';
+        }
     } else {
         formattedData += '<strong>Data:</strong> ' + JSON.stringify(block.data) + '<br>';
     }
     return formattedData;
 }
+

@@ -14,6 +14,6 @@ def generate_signature(private_key, data):
 def create_transaction(sender, recipient, amount, private_key, fee):
     tx = {'sender': sender, 'recipient': recipient, 'amount': amount, 'fee': fee}
     signature = (generate_signature(private_key, str(tx).encode())).hex()
-    tx['Verification Status '] = "signed"
+    tx['signature'] = signature
     return tx
 
