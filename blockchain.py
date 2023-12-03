@@ -36,7 +36,7 @@ class Blockchain:
     # tested with diff = 5 -> block mined successfully and added
     # tested with diff = 7 -> block mined successfully and added
 
-    def __init__(self, difficulty=5, max_mining_time=5*60):
+    def __init__(self, difficulty=6, max_mining_time=5*60):
         # to store the transactions in memepool before they are mined , 
         # so only if mined they can become a part of the chain
         self.mempool = []
@@ -69,8 +69,6 @@ class Blockchain:
                 # saving updated blokchain
                 self.save_chain_to_file()
 
-
-
     def mine_block(self, previous_block, data, difficulty, max_mining_time):
 
         """
@@ -82,8 +80,8 @@ class Blockchain:
         index = previous_block.index + 1
         print(index)
         timestamp = datetime.now()
-        previous_hash = previous_block.current_hash 
-        #previous_hash = previous_block.calculate_hash() if index > 1 else "0"
+        previous_hash = previous_block.current_hash
+        # previous_hash = previous_block.calculate_hash() if index > 1 else "0"
         nonce = 0
         start_time = time.time()
 

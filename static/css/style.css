@@ -155,8 +155,9 @@ button:hover {
     max-height: 250px;
     overflow-y: auto; /* Makes it scrollable if content is too long */
     background-color: #1d182e; /* Light background for the transaction history*/
-    border-radius: 20px;
+    border-radius: 5px;
     border: 1px solid #ddd;
+    padding: 20px;
 }
 /* Responsive grid adjustments */
 @media (max-width: 767px) {
