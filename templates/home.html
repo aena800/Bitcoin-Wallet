@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cryptocurrency Wallet Homepage</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+<!--Image Slider-->
+<div id="slides" class="carousel slide" data-ride="carousel">
+    <ul class="carousel-indicators">
+        <li data-target="#slides" data-slide-to="0" class="active"></li> 
+        <li data-target="#slides" data-slide-to="1"></li> 
+        <li data-target="#slides" data-slide-to="2"></li> 
+    </ul>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="https://www.shutterstock.com/image-photo/metaverse-blockchain-technology-concepts-person-600nw-2070783284.jpg" alt="">
+            <div class="carousel-caption">
+                <h1><b>Welcome To Your BitCoin Wallet</b></h1>  <br> <br>             
+                
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="https://wpcdn.us-midwest-1.vip.tn-cloud.net/www.ibmadison.com/content/uploads/2023/11/e/x/1123-ec-feat-finance.png" alt="">
+            <div class="carousel-caption">
+                <h1><b>Welcome To Your BitCoin Wallet</b></h1>  <br> <br>             
+                
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="https://img.freepik.com/premium-photo/digital-abstract-background-with-scifi-neon-light-line-pattern-picturesque_31965-145435.jpg" alt="">
+            <div class="carousel-caption">
+                <h1><b>Welcome To Your BitCoin Wallet</b></h1>  <br> <br>             
+               
+            </div>
+        </div>
+    </div>
+</div>
+<!--end of slider-->
+    <br><br>
+    <div class="container text-center">
+
+       
+        <br><br>
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">View Your Wallet</h5>
+                        <p class="card-text" style="color:grey">Access and manage your wallet information.</p>
+                        <a href="/display_wallet" class="btn btn-primary">Go to Wallet</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Create A Transaction</h5>
+                        <p class="card-text" style="color:grey">Initiate and manage cryptocurrency transactions.</p>
+                        <a href="/create_transaction" class="btn btn-primary">Create Transaction</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">View Blockchain</h5>
+                        <p class="card-text" style="color:grey">Explore the blocks in the blockchain.</p>
+                    <br>
+                        <a href="/display_chain" class="btn btn-primary">View Blockchain</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br><br><br><br>
+</body>
+</html>
